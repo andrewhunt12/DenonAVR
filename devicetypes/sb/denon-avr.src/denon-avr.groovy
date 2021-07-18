@@ -168,7 +168,7 @@ main "multiAVR"
     }
 }
 def parse(String description) {
-	//log.debug "Parsing '${description}'"
+	log.debug "Parsing '${description}'"
  	def map = stringToMap(description)
     if(!map.body || map.body == "DQo=") { return }
 	def body = new String(map.body.decodeBase64())
@@ -192,13 +192,15 @@ def parse(String description) {
     if(statusrsp.MasterVolume.value.text()) { 
     	def int volLevel = (int) statusrsp.MasterVolume.value.toFloat() ?: -40.0
         volLevel = (volLevel + 80)
-        	log.debug "Adjusted volume is ${volLevel}"
+        log.debug "Adjusted volume is ${volLevel}"
+
         def int curLevel = 36
         try {
         	curLevel = device.currentValue("level")
         	log.debug "Current volume is ${curLevel}"
         } catch(NumberFormatException nfe) { 
         	curLevel = 36
+			log.debug "Error in here, ${curLevel}"
         }
         if(curLevel != volLevel) {
     		sendEvent(name: "level", value: volLevel)
@@ -397,7 +399,8 @@ def parse(String description) {
 
         hubAction
     }
-    def request2(body) { 
+    def request2(body) {
+    	log.debug "Request2: {$body}"
         def hosthex = convertIPtoHex(destIp)
         def porthex = convertPortToHex(destPort)
         device.deviceNetworkId = "$hosthex:$porthex" 
